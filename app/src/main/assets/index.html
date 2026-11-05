@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#faf8ef">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>2048 Choice</title>
+  <link rel="stylesheet" href="themes.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-theme="classic">
+  <main id="home-screen" class="screen home-screen">
+    <div class="home-menu">
+      <h1>2048</h1>
+      <div class="board-picker" role="group" aria-label="Board size">
+        <button data-action="smaller" aria-label="Smaller board">‹</button>
+        <span id="board-size-label">4 × 4</span>
+        <button data-action="larger" aria-label="Larger board">›</button>
+      </div>
+      <div class="home-actions">
+        <button id="resume-button" class="primary" data-action="resume" disabled>CONTINUE</button>
+        <button id="start-button" class="primary" data-action="start">NEW GAME</button>
+      </div>
+      <nav class="home-icons" aria-label="Game menu">
+        <button class="icon-button" data-action="leaderboard" aria-label="Leaderboard" data-icon="trophy"></button>
+        <button class="icon-button" data-action="options" aria-label="Game options" data-icon="settings"></button>
+        <button class="icon-button" data-action="themes" aria-label="Themes" data-icon="palette"></button>
+        <button class="icon-button" data-action="help" aria-label="How to play" data-icon="help"></button>
+      </nav>
+    </div>
+  </main>
+
+  <main id="game-screen" class="screen game-screen" hidden>
+    <header class="score-header"><h1>2048</h1><div class="score-box"><span>SCORE</span><strong id="score">0</strong><span id="score-gain" aria-hidden="true"></span></div><div class="score-box best-box"><span>HIGH SCORE</span><strong id="best">0</strong></div></header>
+    <div class="game-toolbar"><button class="icon-button" data-action="home" aria-label="Home" data-icon="home"></button><button id="assistance-button" class="icon-button assistance-button" data-action="assistance" aria-label="Assistance" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 8 3v6c0 4-4 7-8 9-4-2-8-5-8-9V6Z"/><path d="m8 12 3 3 5-6"/></svg><span id="assistance-state" aria-hidden="true">OFF</span></button><div class="next-tile-control"><div role="group" aria-label="Choose new tile value"><button data-spawn="2" aria-label="Spawn 2" aria-pressed="true">2</button><button data-spawn="4" aria-label="Spawn 4" aria-pressed="false">4</button></div></div><button id="undo-button" class="icon-button" data-action="undo" aria-label="Undo last move" data-icon="undo"></button><button class="icon-button" data-action="restart" aria-label="Restart game" data-icon="restart"></button></div>
+    <div id="board" class="board" tabindex="0" role="application" aria-label="2048 board. Swipe or use arrow keys to move tiles.">
+      <div id="cells" class="cells" aria-hidden="true"></div><div id="tiles" class="tiles" aria-hidden="true"></div>
+      <div id="completion-overlay" class="completion-overlay" role="region" aria-label="Board completed" hidden>
+        <div id="completion-confetti" class="completion-confetti" aria-hidden="true"></div>
+        <span class="completion-trophy" data-icon="trophy" aria-hidden="true"></span>
+        <h2>Board complete!</h2><p id="completion-subtitle"></p>
+        <div class="completion-stats"><div><span>Your score</span><strong id="completion-score"></strong></div><div><span>Maximum possible</span><strong id="completion-max"></strong></div></div>
+        <strong id="completion-percent"></strong><small id="completion-gap"></small>
+        <div class="completion-actions"><button data-action="view-completed">View board</button><button data-action="home">Home</button></div>
+      </div>
+      <button id="win-overlay" class="win-overlay" data-action="keep-playing" aria-label="You win! Tap to continue" aria-hidden="true" tabindex="-1"><strong>You Win!</strong><span>Tap to Continue</span></button>
+      <div id="board-overlay" class="board-overlay" hidden><span class="overlay-symbol" id="overlay-symbol">✦</span><h2 id="overlay-title">You made 2048!</h2><p id="overlay-description"></p><button class="primary" id="overlay-main" data-action="keep-playing">Keep playing</button><button class="secondary" id="overlay-undo" data-action="undo">Undo last move</button></div>
+    </div>
+    <div id="live-status" class="sr-only" role="status" aria-live="polite"></div>
+  </main>
+
+  <main id="leaderboard-screen" class="screen leaderboard-screen" hidden>
+    <header class="page-header"><button class="icon-button subtle" data-action="back" aria-label="Back" data-icon="back"></button><span>Leaderboard</span><button class="icon-button subtle" data-action="refresh" aria-label="Refresh leaderboard" data-icon="restart"></button></header>
+    <div class="leaderboard-filters"><label>BOARD<select id="ranking-size" aria-label="Leaderboard board size"></select></label><label>UNDO MODE<select id="ranking-mode" aria-label="Leaderboard undo mode"><option value="standard">Standard</option><option value="unlimited">Unlimited</option></select></label></div>
+    <div class="personal-best"><div><span class="eyebrow">YOUR PERSONAL BEST</span><strong id="ranking-best">0</strong><small id="ranking-best-mode">4 × 4 · Standard</small></div><span class="best-art" aria-hidden="true" data-icon="trophy"></span></div>
+    <div class="ranking-section-title"><h2>Friends leaderboard</h2><button class="text-button" data-action="nickname" id="nickname-button">Set nickname ↗</button></div>
+    <p id="ranking-status" class="muted" role="status"></p><ol id="rankings" class="rankings"></ol>
+    <div id="ranking-empty" class="empty-state" hidden><span data-icon="trophy"></span><h3 id="empty-title">The first move is yours.</h3><p id="empty-description"></p><button class="secondary" id="connect-button" data-action="connect">Connect leaderboard</button></div>
+    <p class="ranking-footnote">All-time bests · Separate boards for each size and undo mode.<br>Play offline. Share your scores when you’re back online.</p>
+    <button class="text-button connection-link" data-action="connect">Connection settings</button>
+  </main>
+  <dialog id="modal"><form method="dialog"><header><h2 id="modal-title"></h2><button class="icon-button subtle" value="cancel" aria-label="Close" data-icon="close"></button></header><div id="modal-body"></div><div id="modal-actions"></div></form></dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

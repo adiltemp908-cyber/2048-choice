@@ -1,0 +1,10 @@
+{
+  "name": "2048-choice",
+  "version": "1.9.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "build:apk": "python scripts/build_apk.py"
+  }
+}

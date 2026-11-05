@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /boards/{board}/scores/{player} {
+      function validBoard() { return board.matches('v1_[3-8]_(standard|unlimited)'); }
+      function normalScoreCap() {
+        return board.matches('v1_3_.*') ? 16352 :
+          board.matches('v1_4_.*') ? 3932100 :
+          board.matches('v1_5_.*') ? 3221225376 :
+          board.matches('v1_6_.*') ? 9620726742900 : 9007199254740991;
+      }
+      function normalTileCap() {
+        return board.matches('v1_3_.*') ? 1024 :
+          board.matches('v1_4_.*') ? 131072 :
+          board.matches('v1_5_.*') ? 67108864 :
+          board.matches('v1_6_.*') ? 137438953472 :
+          board.matches('v1_7_.*') ? 1125899906842624 : 9007199254740991;
+      }
+      // Large values are padded decimal strings so ordering remains exact.
+      function validScoreValue(v) {
+        return (v is int && v > 0 && v <= normalScoreCap() && v % 4 == 0)
+          || (v is string && v.matches('[0-9]{22}(00|04|08|12|16|20|24|28|32|36|40|44|48|52|56|60|64|68|72|76|80|84|88|92|96)')
+            && v > '000000009007199254740991'
+            && ((board.matches('v1_7_.*') && v <= '000000108086391056891712')
+              || (board.matches('v1_8_.*') && v <= '004648579506574807006980')));
+      }
+      function validTile(v) {
+        return (v is int && v <= normalTileCap() && v in [4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864, 134217728, 268435456, 536870912, 1073741824, 2147483648, 4294967296, 8589934592, 17179869184, 34359738368, 68719476736, 137438953472, 274877906944, 549755813888, 1099511627776, 2199023255552, 4398046511104, 8796093022208, 17592186044416, 35184372088832, 70368744177664, 140737488355328, 281474976710656, 562949953421312, 1125899906842624, 2251799813685248, 4503599627370496])
+          || (board.matches('v1_8_.*') && v is string && v in ['000000009007199254740992', '000000018014398509481984', '000000036028797018963968', '000000072057594037927936', '000000144115188075855872', '000000288230376151711744', '000000576460752303423488', '000001152921504606846976', '000002305843009213693952', '000004611686018427387904', '000009223372036854775808', '000018446744073709551616', '000036893488147419103232']);
+      }
+      function validScore() {
+        let d = request.resource.data;
+        return d.keys().hasOnly(['nickname', 'score', 'maxTile', 'updatedAt'])
+          && d.keys().hasAll(['nickname', 'score', 'maxTile', 'updatedAt'])
+          && d.nickname is string && d.nickname.size() >= 1 && d.nickname.size() <= 20
+          && validScoreValue(d.score) && validTile(d.maxTile)
+          && d.updatedAt is timestamp;
+      }
+      function nondecreasing() {
+        let next = request.resource.data.score;
+        let prior = resource.data.score;
+        return (next is int && prior is int && next >= prior)
+          || (next is string && prior is int)
+          || (next is string && prior is string && next >= prior);
+      }
+      allow read: if request.auth != null && validBoard();
+      allow create: if request.auth != null && request.auth.uid == player && validBoard() && validScore();
+      allow update: if request.auth != null && request.auth.uid == player && validBoard() && validScore() && nondecreasing();
+      allow delete: if false;
+    }
+  }
+}
