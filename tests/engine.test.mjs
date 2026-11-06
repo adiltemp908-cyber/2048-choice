@@ -28,9 +28,9 @@ test('all four directions preserve leading-edge merge order', () => {
   assert.deepEqual(moveBoard(b, 'down').board, [[0, 0, 0], [4, 0, 0], [4, 0, 0]]);
   assert.deepEqual(moveBoard([[2, 2, 4], [0, 0, 0], [0, 0, 0]], 'right').board[0], [0, 4, 4]);
 });
-test('4x4 restriction selects only empty top-row cells', () => {
-  const b = [[0, 2, 0, 4], [2, 4, 8, 0], [4, 8, 16, 32], [8, 16, 32, 64]];
-  assert.deepEqual(spawnCells(b, true), [[0, 0], [0, 2]]);
+test('4x4 restriction selects only empty opposite-row cells when that row is fully empty', () => {
+  const b = [[0, 0, 0, 0], [2, 4, 8, 0], [4, 8, 16, 32], [64, 32, 16, 8]];
+  assert.deepEqual(spawnCells(b, true), [[0, 0], [0, 1], [0, 2], [0, 3]]);
   for (let i = 0; i < 100; i++) {
     const g = fixture(b, 'standard', () => i / 100);
     assert.equal(g.spawn().r, 0);
@@ -57,7 +57,7 @@ test('no top-row restriction on other sizes or other occupancy patterns', () => 
 test('smart spawning follows all four edges and both corner orientations', () => {
   const rotate = b => b[0].map((_, c) => b.map(row => row[c]).reverse());
   for (const mirror of [false, true]) {
-    let board = [[0, 2, 0, 4], [2, 4, 8, 0], [4, 8, 16, 32], [128, 64, 32, 16]];
+    let board = [[0, 0, 0, 0], [2, 4, 8, 0], [4, 8, 16, 32], [128, 64, 32, 16]];
     if (mirror) board = board.map(row => row.slice().reverse());
     for (let turn = 0; turn < 4; turn++) {
       const before = JSON.stringify(board);
@@ -74,7 +74,7 @@ test('smart spawning follows all four edges and both corner orientations', () =>
         assert.ok(expected.some(([r, c]) => r === spawned.r && c === spawned.c));
         assert.equal(spawned.value, value);
       }
-      assert.equal(spawnCells(board, false).length, 3);
+      assert.equal(spawnCells(board, false).length, 5);
       assert.equal(JSON.stringify(board), before);
       board = rotate(board);
     }
@@ -82,16 +82,18 @@ test('smart spawning follows all four edges and both corner orientations', () =>
 });
 
 test('smart spawning requires the corner pair and exact occupancy, but no milestone', () => {
-  const base = [[0, 2, 0, 4], [2, 4, 8, 0], [4, 8, 16, 32], [128, 64, 32, 16]];
-  assert.equal(spawnCells(base, true).length, 2, 'works below 4096');
+  const base = [[0, 0, 0, 0], [2, 4, 8, 0], [4, 8, 16, 32], [128, 64, 32, 16]];
+  assert.equal(spawnCells(base, true).length, 4, 'works below 4096');
   const noCorner = base.map(row => row.slice()); noCorner[2][1] = 256;
-  assert.equal(spawnCells(noCorner, true).length, 3);
+  assert.equal(spawnCells(noCorner, true).length, 5);
   const noPair = base.map(row => row.slice()); noPair[2][1] = 128; noPair[3][0] = 256;
-  assert.equal(spawnCells(noPair, true).length, 3, 'runner-up must be adjacent');
+  assert.equal(spawnCells(noPair, true).length, 5, 'runner-up must be adjacent');
   const incomplete = base.map(row => row.slice()); incomplete[2][1] = 0;
-  assert.equal(spawnCells(incomplete, true).length, 4);
+  assert.equal(spawnCells(incomplete, true).length, 6);
   const tied = base.map(row => row.slice()); tied[3][1] = 128;
-  assert.equal(spawnCells(tied, true).length, 2, 'equal maxima count');
+  assert.equal(spawnCells(tied, true).length, 4, 'equal maxima count');
+  const occupiedOpposite = base.map(row => row.slice()); occupiedOpposite[0][0] = 2;
+  assert.equal(spawnCells(occupiedOpposite, true).length, 4, 'the opposite fourth row must be completely empty');
 });
 test('toggle controls every new tile and does not change existing tiles', () => {
   const g = fixture([[2, 2, 0], [0, 0, 0], [0, 0, 0]]);

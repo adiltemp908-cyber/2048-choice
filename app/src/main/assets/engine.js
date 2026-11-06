@@ -13,9 +13,10 @@ export function spawnCells(board, assisted = false) {
     const protectedCells = new Set();
     for (const { edge } of cornerEdges(board)) {
       const pos = (depth, i) => edge === 'top' ? [depth, i] : edge === 'bottom' ? [n - 1 - depth, i] : edge === 'left' ? [i, depth] : [i, n - 1 - depth];
-      const lines = [0, 1, 2].map(depth => Array.from({ length: n }, (_, i) => pos(depth, i)));
+      const lines = [0, 1, 2, 3].map(depth => Array.from({ length: n }, (_, i) => pos(depth, i)));
       if (lines[0].every(([r, c]) => board[r][c]) && lines[1].every(([r, c]) => board[r][c])
-          && lines[2].filter(([r, c]) => board[r][c]).length === 3) {
+          && lines[2].filter(([r, c]) => board[r][c]).length === 3
+          && lines[3].every(([r, c]) => !board[r][c])) {
         for (const [r, c] of lines[2]) if (!board[r][c]) protectedCells.add(`${r},${c}`);
       }
     }
