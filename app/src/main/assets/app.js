@@ -122,7 +122,8 @@ function layoutBoard() {
 }
 function position(el, r, c) { el.style.transform = `translate(${geom.pad + c * (geom.cell + geom.gap)}px,${geom.pad + r * (geom.cell + geom.gap)}px)`; }
 function tile(value, r, c, className = '') {
-  const el = document.createElement('div'); el.className = `tile ${value > 2048 ? 'large ' : ''}${className}`; el.dataset.value = value; el.dataset.cell = `${r},${c}`;
+  const highTone = value > 2048 ? `high-tone-${(Math.log2(value) - 12) % 6}` : '';
+  const el = document.createElement('div'); el.className = `tile ${value > 2048 ? `large ${highTone} ` : ''}${className}`; el.dataset.value = value; el.dataset.cell = `${r},${c}`;
   const digits = exact(value).toString().length;
   const powerLabel = digits * 5 > geom.cell - 4;
   el.style.setProperty('--tile-font', (powerLabel ? geom.cell * .45 : Math.max(9, Math.min(geom.cell * .48, geom.cell * 1.5 / Math.max(2.4, digits)))) + 'px');

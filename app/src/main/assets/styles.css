@@ -82,6 +82,13 @@ svg { width:22px; height:22px; display:block; fill:none; stroke:currentColor; st
 .tile[data-value="1024"] { background:var(--t1024); color:var(--tile-bright); }
 .tile[data-value="2048"] { background:var(--t2048); color:var(--tile-bright); }
 .tile.large { background:var(--tlarge); color:var(--tile-bright); }
+/* Classic gives high tiles a six-colour loop; the other themes keep their own dark large-tile colour. */
+body[data-theme="classic"] .tile.high-tone-0 { background:#2f7180; }
+body[data-theme="classic"] .tile.high-tone-1 { background:#4d5f9f; }
+body[data-theme="classic"] .tile.high-tone-2 { background:#72529b; }
+body[data-theme="classic"] .tile.high-tone-3 { background:#994f82; }
+body[data-theme="classic"] .tile.high-tone-4 { background:#a95745; }
+body[data-theme="classic"] .tile.high-tone-5 { background:#8a6737; }
 .tile.spawn>span { animation:appear 120ms ease-out; }
 .tile.spawn { animation:tile-appear 120ms ease-out; }
 .tile.merge>span { animation:merge 140ms ease-out; }

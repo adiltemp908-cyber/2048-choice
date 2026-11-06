@@ -174,6 +174,19 @@ try {
   await page.setViewportSize({ width: 393, height: 851 });
   await page.screenshot({ path: resolve(root, 'build/previews/large-score.png') });
 
+  // Classic gives each high-tile tier its own colour instead of one shared charcoal.
+  await seed([[4096,8192,16384,32768],[65536,131072,0,0],[0,0,0,0],[0,0,0,0]]);
+  await page.evaluate(() => { document.body.dataset.theme = 'classic'; });
+  const highTileColours = await page.locator('.tile.large').evaluateAll(nodes => nodes.map(el => ({ value: Number(el.dataset.value), colour: getComputedStyle(el).backgroundColor })));
+  assert.deepEqual(highTileColours, [
+    { value: 4096, colour: 'rgb(47, 113, 128)' },
+    { value: 8192, colour: 'rgb(77, 95, 159)' },
+    { value: 16384, colour: 'rgb(114, 82, 155)' },
+    { value: 32768, colour: 'rgb(153, 79, 130)' },
+    { value: 65536, colour: 'rgb(169, 87, 69)' },
+    { value: 131072, colour: 'rgb(138, 103, 55)' }
+  ]);
+
   // New-game settings are independent; assistance keeps the same record bucket.
   await page.locator('.game-toolbar [data-action="home"]').click();
   await page.locator('#start-button').click();
