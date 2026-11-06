@@ -6,13 +6,15 @@
 
 I made this for myself and anyone else who likes trying for high scores in 2048.
 
-When I'm building a board around 2s, I don't want to keep undoing a move just because a 4 spawned. Here, you choose whether the next tile is a 2 or a 4. Its position is still random.
+When I'm doing a highscore run, I don't want to keep undoing a move just because a 4 spawned as when a 4 spawns you are missing out on combining two 2 tiles and losing 4 points in the highscore. Here, you choose whether the next tile is a 2 or a 4. Its position is still random.
 
-The other problem is playing too fast. One accidental swipe can mess up a good board, and sometimes I've already swiped again before I notice. A single undo can't always get me back. Unlimited undo lets me go back through both moves, or further if I need to. Standard undo is there too, with separate high scores.
+The other problem is playing too fast. One accidental swipe can mess up a good board, and sometimes I've already swiped again before I notice that I destroyed my corner configuration. So I have made warnings that can prevent this unfortunate cases of losing your run just because of accidental misinput. 
 
-There are also optional warnings before moves that could disturb your large tiles or pull them away from their corner. They won't catch every mistake, but they give you a chance to stop and check the move.
+I have also made a small change to spawning location in a particular instance where you would be forced to destroy the configuration unless you undo.  This little tweak will save you from that hassle. 
 
-I wanted to spend more time working on a run and less time fighting the controls. These are scores played with those conveniences, so I wouldn't compare them directly with a no-undo run in the original game.
+These above two mentioned features are assistance that you can toggle off or on mid run. Unlimited undo's however is treated as different game mode with a different leaderboard.
+
+
 
 ## What it looks like
 
